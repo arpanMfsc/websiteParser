@@ -1,0 +1,86 @@
+/**
+ * @author arpanpathak
+ *
+ * @created on Aug 27, 2018 4:22:52 PM
+ */
+//change
+package websiteparser.core;
+
+import java.io.FileWriter;
+import java.io.IOException;
+import java.util.Set;
+import java.util.TreeSet;
+
+import org.jsoup.Jsoup;
+/**
+ * Thread for fetching data from website
+ */
+public class ParserThread extends Thread 
+{
+	
+	private String 		url;						// url from which data needs to be fetched..
+	private String 		fileName;					// name of the file where the fetched data will be stored
+	final String 		base_path="D:/Output/"; 	// hard coded base file location...
+	
+	public ParserThread(String url,String fileName) 
+	{
+		this.url		= url;
+		this.fileName	= fileName; 
+	}
+	
+	/**
+	 * This method is used to split the data and returned set of cleaned strings...
+	 * @return set of strings removing leading and trailing white spaces and blank lines
+	 * @throws IOException
+	 */
+	public Set<String> getCleanedData() throws IOException 
+	{
+		
+		// spliting the data into tokens.....
+		String tokens[]			= Jsoup.connect(url).get().text().split("\\.");
+		Set<String> result 		= new TreeSet<>(String.CASE_INSENSITIVE_ORDER); // data will be sorted ignoring case
+		
+		for( int i=0; i<tokens.length ; i++) 
+		{
+			tokens[i] = tokens[i].trim();	// removing trailing and leading white spaces
+			// removing empty lines...
+			if(tokens[i]!=null && !tokens[i].equals(""))
+				result.add(tokens[i]);
+		}
+		
+		return result;
+	}
+
+	@Override
+	public void run() 
+	{
+		FileWriter f = null;
+		try 
+		{
+			System.out.printf("[#%s] Fetching data from \"%s\" \n",this.getName(),url);
+			
+			// creating an Instance of FileWriter which will output the data to fiven file name...
+			f = new FileWriter( base_path + fileName + ".txt" );
+			
+			// Data will atomically be sorted in ascending order because TreeSet is used
+			Set<String> tokens		= getCleanedData();		// will store the cleaned data
+			StringBuilder data		= new StringBuilder(); // is used to concatenate data for writing into file
+			
+			// Looping through cleaned data
+			for(String s: tokens)
+				data.append(s+".\n\n");
+			
+			
+			f.write(data.toString()); // writing data to file
+			f.close();
+			System.out.printf("Fetched data from \"%s\" is stored in %s.txt\n",url,fileName);
+			
+		}
+		catch(Exception e) 
+		{
+			e.printStackTrace();
+		}
+	
+	}
+
+}
