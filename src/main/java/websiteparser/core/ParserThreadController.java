@@ -7,6 +7,7 @@
 package websiteparser.core;
 
 import java.io.*;
+import websiteparser.core.exception.*;
 
 
 /**
@@ -24,14 +25,16 @@ public class ParserThreadController
 	 */
 	public ParserThreadController() 
 	{
+		//creating an instance of BufferedReader for taking input...
 		br = new BufferedReader(new InputStreamReader(System.in));
 	}
 	
 	/**
 	 * call this method for taking input urls from user
-	 * @throws Exception
+	 * @throws InvalidUrlsException
+	 * @throws IOException
 	 */
-	public void inputUrls() throws Exception 
+	public void inputUrls() throws IOException
 	{
 		System.out.println("Enter urls separated by comma(,) :");
 		urls = br.readLine().split(",");
@@ -39,21 +42,31 @@ public class ParserThreadController
 	
 	/**
 	 * call this method for taking input file names from user
-	 * @throws Exception
+	 * @throws InsufficientParameterException
+	 * @throws IOException
 	 */
-	public void inputFileNames() throws Exception 
+	public void inputFileNames() throws InsufficientParameterException,IOException
 	{
 		System.out.println("Enter destination fileNames separated by comma(,) :");
 		fileNames = br.readLine().split(",");
+		
+		/*
+		 * validating input list lengths and throwing exception incase of 
+		 * parameter length mismatch
+		 */
+		if( fileNames.length > urls.length)
+			throw new InsufficientParameterException("File names provided more than no of urls.");
+		
+		if( fileNames.length < urls.length)
+			throw new InsufficientParameterException("File names provided less than no of urls.");
 	}
 	
 	/**
-	 * This method will create multiple threads which will fetch data paralley 
+	 * This method will create multiple threads which will fetch data in parallel 
 	 */
 	public void fetchData() 
 	{
-		for(int i=0 ; i<urls.length ; i++) {
+		for(int i=0 ; i<urls.length ; i++) 
 			new ParserThread(urls[i],fileNames[i]).start();
-		}
 	}
 }

@@ -5,7 +5,6 @@
  */
 package websiteparser.main;
 
-import java.io.*;
 import java.io.IOException;
 import java.net.*;
 import websiteparser.core.*;
@@ -15,15 +14,16 @@ import websiteparser.core.*;
  * this class is used for testing the code.
  *
  */
-public class SimpleApplication {
-	static BufferedReader br = null;
+public class SimpleApplication 
+{
 	/**
 	 * main method
 	 * @param args
 	 * @throws IOException
 	 * @throws URISyntaxException
 	 */
-	public static void main(String[] args) throws IOException, URISyntaxException {
+	public static void main(String[] args) throws IOException, URISyntaxException 
+	{
 		
 		try 
 		{
@@ -32,8 +32,9 @@ public class SimpleApplication {
 			tc.inputFileNames(); 	// taking file name inputs
 			tc.fetchData(); 		// calling the fetch data method which will create multiple threads to fetch data...
 		}
-		catch(Exception e) {
-			e.printStackTrace();
+		catch(Exception e) 
+		{
+			System.out.println(e.getMessage());
 		}
 		
 	}

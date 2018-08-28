@@ -8,10 +8,16 @@ package websiteparser.core;
 
 import java.io.FileWriter;
 import java.io.IOException;
+import java.net.UnknownHostException;
+import java.util.Arrays;
+import java.util.List;
 import java.util.Set;
 import java.util.TreeSet;
-
+import java.util.stream.Collectors;
+import org.jsoup.HttpStatusException;
 import org.jsoup.Jsoup;
+
+import websiteparser.core.exception.InsufficientParameterException;
 /**
  * Thread for fetching data from website
  */
@@ -20,7 +26,7 @@ public class ParserThread extends Thread
 	
 	private String 		url;						// url from which data needs to be fetched..
 	private String 		fileName;					// name of the file where the fetched data will be stored
-	final String 		base_path="D:/Output/"; 	// hard coded base file location...
+	final String 		BASE_PATH="D:/Output/"; 	// hard coded base file location...
 	
 	public ParserThread(String url,String fileName) 
 	{
@@ -35,22 +41,25 @@ public class ParserThread extends Thread
 	 */
 	public Set<String> getCleanedData() throws IOException 
 	{
+		// splitting the data into tokens.....
+		List<String> tokens 	= Arrays.asList( Jsoup.connect(url)
+														  .get()
+														  .text()
+														  .split("\\.")
+												);
 		
-		// spliting the data into tokens.....
-		String tokens[]			= Jsoup.connect(url).get().text().split("\\.");
 		Set<String> result 		= new TreeSet<>(String.CASE_INSENSITIVE_ORDER); // data will be sorted ignoring case
-		
-		for( int i=0; i<tokens.length ; i++) 
-		{
-			tokens[i] = tokens[i].trim();	// removing trailing and leading white spaces
-			// removing empty lines...
-			if(tokens[i]!=null && !tokens[i].equals(""))
-				result.add(tokens[i]);
-		}
+	
+		// Filtering Fetched data, removing empty lines, leading and trailing white spaces...
+		result.addAll(	tokens  .stream     ( )
+					  			.map		( token-> token.trim() )
+								.filter		( token->token!=null && !token.equals("") )
+								.collect	( Collectors.toSet() )
+					 );
 		
 		return result;
 	}
-
+	
 	@Override
 	public void run() 
 	{
@@ -59,8 +68,12 @@ public class ParserThread extends Thread
 		{
 			System.out.printf("[#%s] Fetching data from \"%s\" \n",this.getName(),url);
 			
+			
+			if(fileName.trim().equals(""))
+				throw new InsufficientParameterException("File name can not be empty");
+			
 			// creating an Instance of FileWriter which will output the data to fiven file name...
-			f = new FileWriter( base_path + fileName + ".txt" );
+			f = new FileWriter( BASE_PATH + fileName + ".txt" );
 			
 			// Data will atomically be sorted in ascending order because TreeSet is used
 			Set<String> tokens		= getCleanedData();		// will store the cleaned data
@@ -76,9 +89,25 @@ public class ParserThread extends Thread
 			System.out.printf("Fetched data from \"%s\" is stored in %s.txt\n",url,fileName);
 			
 		}
+		
+		catch(IllegalArgumentException e)
+		{
+			System.out.println("Invalid url given.");
+		}
+		
+		catch(UnknownHostException e)
+		{
+			System.out.println("404 URL Not Found!...");
+		}
+		
+		catch(HttpStatusException e) 
+		{
+			System.out.println(e.getStatusCode());
+		}
+		
 		catch(Exception e) 
 		{
-			e.printStackTrace();
+			System.out.println(e.getMessage());
 		}
 	
 	}
