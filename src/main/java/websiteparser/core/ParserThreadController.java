@@ -51,7 +51,7 @@ public class ParserThreadController
 		fileNames = br.readLine().split(",");
 		
 		/*
-		 * validating input list lengths and throwing exception incase of 
+		 * validating input list lengths and throwing exception in case of 
 		 * parameter length mismatch
 		 */
 		if( fileNames.length > urls.length)

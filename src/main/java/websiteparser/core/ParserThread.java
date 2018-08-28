@@ -8,6 +8,8 @@ package websiteparser.core;
 
 import java.io.FileWriter;
 import java.io.IOException;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.net.UnknownHostException;
 import java.util.Arrays;
 import java.util.List;
@@ -97,19 +99,34 @@ public class ParserThread extends Thread
 		
 		catch(UnknownHostException e)
 		{
-			System.out.println("404 URL Not Found!...");
+			System.out.println("Host Not Found...");
 		}
 		
+		// handing HTTP Status Code exceptions...
 		catch(HttpStatusException e) 
 		{
-			System.out.println(e.getStatusCode());
+			switch(e.getStatusCode())
+			{
+				case	403:
+					System.out.println("403! Forbidden..You might not have permission to access this url..");
+					break;
+				case	404:
+					System.out.println("404! Not Found..");
+					break;
+				case 408:
+					System.out.println("408 Request timeout! Taking too long to reponse");
+					break;
+				case 500:
+					System.out.println("500 Internal Server Error!!");
+					break;
+					
+			}
 		}
 		
 		catch(Exception e) 
 		{
 			System.out.println(e.getMessage());
 		}
-	
 	}
 
 }
